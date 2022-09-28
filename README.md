@@ -17,7 +17,7 @@ what those values are for each variable. Consider the example below consisting o
 and n = 2 variables.
 
 C<sub>1</sub>=x<sub>1</sub> ∨ x<sub>2</sub> &emsp;C<sub>2</sub>=x̅<sub>1</sub> ∨ x<sub>2</sub> &emsp;C<sub>3</sub>=x<sub>1</sub> ∨ x̅<sub>2</sub> &emsp;C<sub>4</sub>=x̅<sub>1</sub> ∨ x̅<sub>2</sub>  
-Notice that there is no combination of variable assignments that satisfies all four clauses. However, setting x 1 = T and x 2 = T satisfies three of the four clauses.
+Notice that there is no combination of variable assignments that satisfies all four clauses. However, setting x<sub>1</sub> = T and x<sub>2</sub> = T satisfies three of the four clauses.
 
 Input Format: The input will be provided in a text file. The first line contains the number of clauses
 m followed by the number of distinct variablesn. Each of the remaining lines represents a clause
