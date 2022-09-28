@@ -17,7 +17,7 @@ C<sub>1</sub>=x<sub>1</sub> ∨ x<sub>2</sub> &emsp;C<sub>2</sub>=x̅<sub>1</sub
 Notice that there is no combination of variable assignments that satisfies all four clauses. However, setting x<sub>1</sub> = T and x<sub>2</sub> = T satisfies three of the four clauses.
 
 Input Format: The input will be provided in a text file. The first line contains the number of clauses
-m followed by the number of distinct variablesn. Each of the remaining lines represents a clause
+m followed by the number of distinct variables n. Each of the remaining lines represents a clause
 and contains two integers that denote the two variables belonging to the clause. Each integer is in
 the range [1, n] or [−n,−1]. If an integer is negative, it represents the negation of that variable.
 The two integers are separated by a single space and the file contains no extraneous spaces.
