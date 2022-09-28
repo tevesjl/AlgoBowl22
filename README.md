@@ -31,8 +31,8 @@ understanding and should be omitted in an actual input file.
 &nbsp;1 -2 &emsp;// The third clause is ( x1 OR (NOT x2))  
 -1 -2 &emsp;// The fourth clause is ((NOT x1) OR (NOT x2))  
 
-Input Restrictions: The number of variables n is an integer satisfying 2 ≤ n ≤ 1,000 and the
-number of clauses m is an integer satisfying 1 ≤ m ≤ 50,000. For an input to be challenging, you
+Input Restrictions: The number of variables n is an integer satisfying 2 ≤ n ≤ 2,000 and the
+number of clauses m is an integer satisfying 1 ≤ m ≤ 100,000. For an input to be challenging, you
 will typically want m >> n.
 
 Output Format: The output is a text file consisting of n + 1 lines: the first line contains the number
