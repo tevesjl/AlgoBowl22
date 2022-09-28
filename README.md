@@ -1,6 +1,3 @@
-# AlgoBowl22
-School of Mines Algorithms AlgoBowl Project
-
 # CSCI 406: AlgoBOWL
 
 ```
