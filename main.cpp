@@ -12,10 +12,10 @@ int main() {
         cerr << "Failed to open test.txt file." << endl;
         return -1;
     }
-    string line;
     int numClauses, numVariables, num;
     int i = 0;
     map<int, int> clauses;
+    string line;
 
     while (!input.eof()) {
         getline(input, line);
@@ -23,9 +23,11 @@ int main() {
         while (ss >> num) {
             if (i == 0) {
                 numClauses = num;
+                i++;
             }
             else if (i == 1) {
                 numVariables = num;
+                i++;
             }
             else {
                 // if the current variable is already mapped, add 1
@@ -38,7 +40,6 @@ int main() {
                     clauses.emplace(num, 1);
                 }
             }
-            i++;
         }
     }
     input.close();
