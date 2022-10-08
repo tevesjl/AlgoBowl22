@@ -11,15 +11,20 @@ using namespace std;
 
 void addClause(pair<int, int>, map<int, vector<pair<int, int>>>&, map<int, int>&, vector<pair<int, int>>&);
 void setTruthValue(int, map<int, int>&);
-int getNumberOfCorrectClauses(map<int, vector<pair<int, int>>>&, map<int, int>&);
+int getNumberOfCorrectClauses(map<int, vector<pair<int, int>>>&, map<int, int>&, vector<pair<int, int>>&);
+int getVariableCorrectClauses(int, map<int, vector<pair<int, int>>>&, map<int, int>&);
 int checkClause(pair<int, int>, map<int, int>&);
+void SimulatedAnnealing(int, map<int, vector<pair<int, int>>>&, map<int, int>&);
 
 int MULTIPLIER[] = {-1, 1};
 int MULTIPLIER_SIZE = 2;
+int T_FACTOR = 5;
+int TEMP_DECREASE = 5;
 
 int main() {
     srand(time(0)); // note that this is pseudo-random: has slight bias towards lower numbers
-    ifstream input("test.txt");
+    ifstream input("prototype_input_fixed.txt");
+    //ifstream input("mini_input.txt");
     if (input.fail()) {
         cerr << "Failed to open test.txt file." << endl;
         return -1;
@@ -56,6 +61,7 @@ int main() {
     for (int i = 0; i < clauseMap.at(1).size(); i++) {
         cout << clauseMap.at(1).at(i).first << " " << clauseMap.at(1).at(i).second << endl;
     }
+
     for (int i = 0; i < clauseMap.at(-1).size(); i++) {
         cout << clauseMap.at(-1).at(i).first << " " << clauseMap.at(-1).at(i).second << endl;
     }
@@ -64,7 +70,57 @@ int main() {
     cout << "1 : " << truthValues.at(1) << endl;
     cout << "2 : " << truthValues.at(2) << endl; */
 
+    SimulatedAnnealing(numVariables, clauseMap, truthValues);
+
+    int numCorrectClauses = getNumberOfCorrectClauses(clauseMap, truthValues, clauses);
+    cout << numClauses << endl;
+    cout << numCorrectClauses << endl;
+
     return 0;
+}
+
+void SimulatedAnnealing(int numVariables, map<int, vector<pair<int, int>>>& clauseMap, map<int, int>& truthValues) {
+    int temperature = T_FACTOR * numVariables;
+    int variable = 1;
+
+    while (temperature > 0) {
+        int currentState = getVariableCorrectClauses(variable, clauseMap, truthValues);
+        // change truth value and get the number of correct clauses
+        truthValues.at(variable) = truthValues.at(variable) * -1;
+        int nextState = getVariableCorrectClauses(variable, clauseMap, truthValues);
+
+        double stateChange = nextState - currentState;
+        if (stateChange < 0) {
+            truthValues.at(variable) = truthValues.at(variable) * -1;
+            /*
+            double probability = exp(stateChange / temperature);
+            // if we do not change truth value
+            if (rand() / RAND_MAX > probability) {
+                truthValues.at(variable) = truthValues.at(variable) * -1;
+            } */
+        }
+
+        temperature -= TEMP_DECREASE;
+
+        if (variable < numVariables) {
+            variable++;
+        }
+        else {
+            variable = 1;
+        }
+    }
+}
+
+// getVariableCorrectClauses: gets the current number of correct clauses based on the variable's truth value
+int getVariableCorrectClauses(int variable, map<int, vector<pair<int, int>>>& clauseMap, map<int, int>& truthValues) {
+    int numCorrectClauses = 0;
+    vector<pair<int, int>> clauseList = clauseMap.at(variable);
+    for (pair<int, int> clause : clauseList) {
+        if (checkClause(clause, truthValues) > 0) {
+            numCorrectClauses++;
+        }
+    }
+    return numCorrectClauses;
 }
 
 // getNumberOfCorrectClauses: gets the current number of correct clauses based on the current truth values
@@ -80,8 +136,8 @@ int getNumberOfCorrectClauses(map<int, vector<pair<int, int>>>& clauseMap, map<i
 
 // checkClause: returns whether the current clause is true or not (returns -1 or 1)
 int checkClause(pair<int, int> clause, map<int, int>& truthValues) {
-    int firstVal = truthValues.at(clause.first);
-    int secondVal = truthValues.at(clause.second);
+    int firstVal = truthValues.at(abs(clause.first));
+    int secondVal = truthValues.at(abs(clause.second));
 
     if ((firstVal * clause.first) > 0 || (secondVal * clause.second) > 0) {
         return 1;
@@ -97,26 +153,26 @@ void addClause(pair<int, int> clause, map<int, vector<pair<int, int>>>& clauseMa
     clauses.push_back(clause);
 
     // first variable
-    if (clauseMap.count(clause.first)) { // if the variable is already mapped, add clause
-        clauseMap.at(clause.first).push_back(clause);
+    if (clauseMap.count(abs(clause.first))) { // if the variable is already mapped, add clause
+        clauseMap.at(abs(clause.first)).push_back(clause);
     }
     else { // else map the variable and call setTruthValue
         vector<pair<int, int>> clauseList;
         clauseList.push_back(clause);
-        clauseMap.emplace(clause.first, clauseList);
+        clauseMap.emplace(abs(clause.first), clauseList);
         if (!truthValues.count(abs(clause.first))) {
             setTruthValue(abs(clause.first), truthValues);
         }
     }
 
     // second variable
-    if (clauseMap.count(clause.second)) { // if the variable is already mapped, add clause
-        clauseMap.at(clause.second).push_back(clause);
+    if (clauseMap.count(abs(clause.second))) { // if the variable is already mapped, add clause
+        clauseMap.at(abs(clause.second)).push_back(clause);
     }
     else { // else map the variable and call setTruthValue
         vector<pair<int, int>> clauseList;
         clauseList.push_back(clause);
-        clauseMap.emplace(clause.second, clauseList);
+        clauseMap.emplace(abs(clause.second), clauseList);
         if (!truthValues.count(abs(clause.second))) {
             setTruthValue(abs(clause.second), truthValues);
         }
