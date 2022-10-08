@@ -9,8 +9,10 @@
 
 using namespace std;
 
-void addClause(pair<int, int>, map<int, vector<pair<int, int>>>&, map<int, int>&);
+void addClause(pair<int, int>, map<int, vector<pair<int, int>>>&, map<int, int>&, vector<pair<int, int>>&);
 void setTruthValue(int, map<int, int>&);
+int getNumberOfCorrectClauses(map<int, vector<pair<int, int>>>&, map<int, int>&);
+int checkClause(pair<int, int>, map<int, int>&);
 
 int MULTIPLIER[] = {-1, 1};
 int MULTIPLIER_SIZE = 2;
@@ -23,11 +25,11 @@ int main() {
         return -1;
     }
 
-    int numClauses, numVariables, num, firstVal, secondVal;
-    int i = 0;
+    int numClauses, numVariables, firstVal, secondVal;
     map<int, int> variableCount;
     map<int, vector<pair<int, int>>> clauseMap;
     map<int, int> truthValues; // key: variable (1, 2, etc), value: -1 (false) or 1 (true)
+    vector<pair<int, int>> clauses;
     string line;
     bool firstLine = true;
 
@@ -39,7 +41,7 @@ int main() {
             ss >> firstVal;
             ss >> secondVal;
             pair<int, int> clause = make_pair(firstVal, secondVal);
-            addClause(clause, clauseMap, truthValues);
+            addClause(clause, clauseMap, truthValues, clauses);
         }
         else {
             ss >> numClauses;
@@ -49,26 +51,51 @@ int main() {
     }
     input.close();
 
+    /*
     cout << "Checking clause map" << endl;
-    for (i = 0; i < clauseMap.at(1).size(); i++) {
+    for (int i = 0; i < clauseMap.at(1).size(); i++) {
         cout << clauseMap.at(1).at(i).first << " " << clauseMap.at(1).at(i).second << endl;
     }
-    for (i = 0; i < clauseMap.at(-1).size(); i++) {
+    for (int i = 0; i < clauseMap.at(-1).size(); i++) {
         cout << clauseMap.at(-1).at(i).first << " " << clauseMap.at(-1).at(i).second << endl;
     }
     cout << endl << "Checking truth values" << endl;
     cout << "There are " << truthValues.size() << " variables" << endl;
     cout << "1 : " << truthValues.at(1) << endl;
-    cout << "2 : " << truthValues.at(2) << endl;
+    cout << "2 : " << truthValues.at(2) << endl; */
 
     return 0;
+}
+
+// getNumberOfCorrectClauses: gets the current number of correct clauses based on the current truth values
+int getNumberOfCorrectClauses(map<int, vector<pair<int, int>>>& clauseMap, map<int, int>& truthValues, vector<pair<int, int>>& clauses) {
+    int numCorrectClauses = 0;
+    for (pair<int, int> clause : clauses) {
+        if (checkClause(clause, truthValues) > 0) {
+            numCorrectClauses++;
+        }
+    }
+    return numCorrectClauses;
+}
+
+// checkClause: returns whether the current clause is true or not (returns -1 or 1)
+int checkClause(pair<int, int> clause, map<int, int>& truthValues) {
+    int firstVal = truthValues.at(clause.first);
+    int secondVal = truthValues.at(clause.second);
+
+    if ((firstVal * clause.first) > 0 || (secondVal * clause.second) > 0) {
+        return 1;
+    }
+    return -1;
 }
 
 /* addClause: Adds a clause to the clauseMap and sets variable's truth value if needed
  * Case 1: if the current clause variable is already mapped, add the clause to the vector
  * Case 2: else create a vector, map the variable, and call setTruthValue
 */
-void addClause(pair<int, int> clause, map<int, vector<pair<int, int>>>& clauseMap, map<int, int>& truthValues) {
+void addClause(pair<int, int> clause, map<int, vector<pair<int, int>>>& clauseMap, map<int, int>& truthValues, vector<pair<int, int>>& clauses) {
+    clauses.push_back(clause);
+
     // first variable
     if (clauseMap.count(clause.first)) { // if the variable is already mapped, add clause
         clauseMap.at(clause.first).push_back(clause);
