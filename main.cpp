@@ -76,8 +76,8 @@ void addClause(pair<int, int> clause, map<int, vector<pair<int, int>>>& clauseMa
         vector<pair<int, int>> clauseList;
         clauseList.push_back(clause);
         clauseMap.emplace(clause.first, clauseList);
-        if (clause.first > 0) {
-            setTruthValue(clause.first, truthValues);
+        if (!truthValues.count(abs(clause.first))) {
+            setTruthValue(abs(clause.first), truthValues);
         }
     }
 
@@ -89,8 +89,8 @@ void addClause(pair<int, int> clause, map<int, vector<pair<int, int>>>& clauseMa
         vector<pair<int, int>> clauseList;
         clauseList.push_back(clause);
         clauseMap.emplace(clause.second, clauseList);
-        if (clause.second > 0) {
-            setTruthValue(clause.second, truthValues);
+        if (!truthValues.count(abs(clause.second))) {
+            setTruthValue(abs(clause.second), truthValues);
         }
     }
 }
