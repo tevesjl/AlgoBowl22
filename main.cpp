@@ -98,6 +98,6 @@ void addClause(pair<int, int> clause, map<int, vector<pair<int, int>>>& clauseMa
 // setTruthValue: uses rng to randomly set the truth value for the given variable
 void setTruthValue(int variable, map<int, int>& truthValues) {
     //get a random truth value and map it
-    int truthValue = variable * MULTIPLIER[rand() % MULTIPLIER_SIZE];
+    int truthValue = MULTIPLIER[rand() % MULTIPLIER_SIZE];
     truthValues.emplace(variable, truthValue);
 }
