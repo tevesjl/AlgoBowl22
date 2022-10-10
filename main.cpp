@@ -21,7 +21,7 @@ void setTruthValue(int, map<int, int>&);
 int MULTIPLIER[] = {-1, 1};
 int MULTIPLIER_SIZE = 2;
 double T_FACTOR = 5;
-double ALPHA = 1.65;
+double ALPHA = 1.15;
 int ITERATION_FACTOR = 5;
 int TEMP_DECREASE = 5;
 
@@ -30,8 +30,9 @@ int main() {
     srand(time(0)); // note that this is pseudo-random: has slight bias towards lower numbers
 
     // input stream
-    ifstream input("prototype_input_fixed.txt");
+    //ifstream input("prototype_input_fixed.txt");
     //ifstream input("mini_input.txt");
+    ifstream input("50k_input.txt");
     if (input.fail()) {
         cerr << "Failed to open input file." << endl;
         return -1;
@@ -109,36 +110,52 @@ void SimulatedAnnealing(int numVariables, map<int, vector<pair<int, int>>>& clau
     //double temperature = T_FACTOR * numVariables;
     double temperature = 1000;
     int variable = 1;
+    //int variable = (rand() % 2000) + 1;
     int numIterations = 0;
+    int k = 0;
 
     while (temperature > 0) {
         int currentState = getVariableCorrectClauses(variable, clauseMap, truthValues);
-        // change truth value and get the number of correct clauses
+
+        // change truth value and get the number of correct clauses for nextState
         truthValues.at(variable) = truthValues.at(variable) * -1;
         int nextState = getVariableCorrectClauses(variable, clauseMap, truthValues);
 
+        // revert truth value (go back to currentState)
+        truthValues.at(variable) = truthValues.at(variable) * -1;
+
         double stateChange = nextState - currentState;
+        // if nextState is worse, we have some probability that we change it anyways
         if (stateChange < 0) {
-            truthValues.at(variable) = truthValues.at(variable) * -1;
-            /*
             double probability = exp(stateChange / temperature);
-            // if we do not change truth value
-            if (rand() / RAND_MAX > probability) {
+            if (rand() / RAND_MAX < probability) {
                 truthValues.at(variable) = truthValues.at(variable) * -1;
-            } */
+            }
+        }
+        // if nextState is the same or better, we change to the nextState
+        else {
+            truthValues.at(variable) = truthValues.at(variable) * -1;
         }
 
         // temperature change: determines how much we move on the "curve"
         //temperature -= TEMP_DECREASE;
         // iterate through all the variables on the first run, then every ITERATION_FACTOR variables afterwards
+
+        if (numIterations % numVariables == 0) {
+            temperature = temperature / (1 + ALPHA*(log(1+k)));
+            k++;
+        }
+
+        /*
         if (numIterations % ITERATION_FACTOR == 0 && numIterations > numVariables) {
             temperature = temperature / (1 + ALPHA*(log(1+numIterations)));
         }
         else {
             temperature = temperature / (1 + ALPHA*(log(1+numIterations)));
-        }
+        } */
 
         // if haven't gone over all the variables, keep going
+
         if (variable < numVariables) {
             variable++;
         }
@@ -146,6 +163,7 @@ void SimulatedAnnealing(int numVariables, map<int, vector<pair<int, int>>>& clau
         else {
             variable = 1;
         }
+        //variable = (rand() % 2000) + 1;
         numIterations++;
     }
 }
