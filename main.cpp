@@ -9,35 +9,43 @@
 
 using namespace std;
 
-void addClause(pair<int, int>, map<int, vector<pair<int, int>>>&, map<int, int>&, vector<pair<int, int>>&);
-void setTruthValue(int, map<int, int>&);
+// function definitions
+void SimulatedAnnealing(int, map<int, vector<pair<int, int>>>&, map<int, int>&);
 int getNumberOfCorrectClauses(map<int, vector<pair<int, int>>>&, map<int, int>&, vector<pair<int, int>>&);
 int getVariableCorrectClauses(int, map<int, vector<pair<int, int>>>&, map<int, int>&);
 int checkClause(pair<int, int>, map<int, int>&);
-void SimulatedAnnealing(int, map<int, vector<pair<int, int>>>&, map<int, int>&);
+void addClause(pair<int, int>, map<int, vector<pair<int, int>>>&, map<int, int>&, vector<pair<int, int>>&);
+void setTruthValue(int, map<int, int>&);
 
+// global variables
 int MULTIPLIER[] = {-1, 1};
 int MULTIPLIER_SIZE = 2;
-int T_FACTOR = 5;
+double T_FACTOR = 5;
+double ALPHA = 1.65;
+int ITERATION_FACTOR = 5;
 int TEMP_DECREASE = 5;
 
 int main() {
+    // set a seed
     srand(time(0)); // note that this is pseudo-random: has slight bias towards lower numbers
+
+    // input stream
     ifstream input("prototype_input_fixed.txt");
     //ifstream input("mini_input.txt");
     if (input.fail()) {
-        cerr << "Failed to open test.txt file." << endl;
+        cerr << "Failed to open input file." << endl;
         return -1;
     }
 
+    // variable declarations
     int numClauses, numVariables, firstVal, secondVal;
-    map<int, int> variableCount;
-    map<int, vector<pair<int, int>>> clauseMap;
-    map<int, int> truthValues; // key: variable (1, 2, etc), value: -1 (false) or 1 (true)
-    vector<pair<int, int>> clauses;
-    string line;
     bool firstLine = true;
+    string line;
+    vector<pair<int, int>> clauses; // vector that simply contains all clauses
+    map<int, vector<pair<int, int>>> clauseMap; // key: variable, value: all clauses that contain the key
+    map<int, int> truthValues; // key: variable (1, 2, etc), value: -1 (false) or 1 (true)
 
+    // read the input file
     while (!input.eof()) {
         getline(input, line);
         stringstream ss(line);
@@ -56,32 +64,52 @@ int main() {
     }
     input.close();
 
-    /*
-    cout << "Checking clause map" << endl;
-    for (int i = 0; i < clauseMap.at(1).size(); i++) {
-        cout << clauseMap.at(1).at(i).first << " " << clauseMap.at(1).at(i).second << endl;
-    }
-
-    for (int i = 0; i < clauseMap.at(-1).size(); i++) {
-        cout << clauseMap.at(-1).at(i).first << " " << clauseMap.at(-1).at(i).second << endl;
-    }
-    cout << endl << "Checking truth values" << endl;
-    cout << "There are " << truthValues.size() << " variables" << endl;
-    cout << "1 : " << truthValues.at(1) << endl;
-    cout << "2 : " << truthValues.at(2) << endl; */
-
+    // do simulated annealing and get number of correct clauses after
     SimulatedAnnealing(numVariables, clauseMap, truthValues);
-
     int numCorrectClauses = getNumberOfCorrectClauses(clauseMap, truthValues, clauses);
     cout << numClauses << endl;
-    cout << numCorrectClauses << endl;
+    cout << numCorrectClauses;
+
+    // output stream
+    ofstream output("output.txt");
+    if (output.fail()) {
+        cerr << "Failed to create output file." << endl;
+        return -1;
+    }
+    // writing to output.txt
+    output << numCorrectClauses << endl;
+    for (int i = 1; i <= truthValues.size(); i++) {
+        // on all other lines, add newlines
+        if (i < truthValues.size()) {
+            // output wants '-1' to be 0 for false, so manually add '0' instead of '-1'
+            if (truthValues.at(i) < 0) {
+                output << "0" << endl;
+            }
+            else {
+                output << truthValues.at(i) << endl;
+            }
+        }
+        // on the last line, do not do a newline
+        else {
+            if (truthValues.at(i) < 0) {
+                output << "0";
+            }
+            else {
+                output << truthValues.at(i);
+            }
+        }
+    }
+    output.close();
 
     return 0;
 }
 
+// SimulatedAnnealing: implements the process of simulated annealing to get close to the optimal solution
 void SimulatedAnnealing(int numVariables, map<int, vector<pair<int, int>>>& clauseMap, map<int, int>& truthValues) {
-    int temperature = T_FACTOR * numVariables;
+    //double temperature = T_FACTOR * numVariables;
+    double temperature = 1000;
     int variable = 1;
+    int numIterations = 0;
 
     while (temperature > 0) {
         int currentState = getVariableCorrectClauses(variable, clauseMap, truthValues);
@@ -100,14 +128,25 @@ void SimulatedAnnealing(int numVariables, map<int, vector<pair<int, int>>>& clau
             } */
         }
 
-        temperature -= TEMP_DECREASE;
+        // temperature change: determines how much we move on the "curve"
+        //temperature -= TEMP_DECREASE;
+        // iterate through all the variables on the first run, then every ITERATION_FACTOR variables afterwards
+        if (numIterations % ITERATION_FACTOR == 0 && numIterations > numVariables) {
+            temperature = temperature / (1 + ALPHA*(log(1+numIterations)));
+        }
+        else {
+            temperature = temperature / (1 + ALPHA*(log(1+numIterations)));
+        }
 
+        // if haven't gone over all the variables, keep going
         if (variable < numVariables) {
             variable++;
         }
+        // else restart at the first variable
         else {
             variable = 1;
         }
+        numIterations++;
     }
 }
 
