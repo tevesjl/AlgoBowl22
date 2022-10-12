@@ -30,9 +30,10 @@ int main() {
     srand(time(0)); // note that this is pseudo-random: has slight bias towards lower numbers
 
     // input stream
-    //ifstream input("prototype_input_fixed.txt");
-    //ifstream input("mini_input.txt");
-    ifstream input("50k_input.txt");
+    string inputName;
+    cin >> inputName;
+
+    ifstream input("input_group" + inputName + ".txt");
     if (input.fail()) {
         cerr << "Failed to open input file." << endl;
         return -1;
@@ -49,6 +50,9 @@ int main() {
     // read the input file
     while (!input.eof()) {
         getline(input, line);
+        if (line.empty()) {
+            continue;
+        }
         stringstream ss(line);
 
         if (!firstLine) {
@@ -65,6 +69,8 @@ int main() {
     }
     input.close();
 
+    //cout << clauseMap.count(1) << endl;
+
     // do simulated annealing and get number of correct clauses after
     SimulatedAnnealing(numVariables, clauseMap, truthValues);
     int numCorrectClauses = getNumberOfCorrectClauses(clauseMap, truthValues, clauses);
@@ -72,16 +78,28 @@ int main() {
     cout << numCorrectClauses;
 
     // output stream
-    ofstream output("output.txt");
+    cout << endl;
+    string outputName;
+    cin >> outputName;
+    ofstream output("output" + outputName + ".txt");
     if (output.fail()) {
         cerr << "Failed to create output file." << endl;
         return -1;
     }
     // writing to output.txt
     output << numCorrectClauses << endl;
-    for (int i = 1; i <= truthValues.size(); i++) {
+    for (int i = 1; i <= numVariables; i++) {
+        if (!clauseMap.count(i)) {
+            if (i < numVariables) {
+                output << "1" << endl;
+            }
+            else {
+                output << "1";
+            }
+            continue;
+        }
         // on all other lines, add newlines
-        if (i < truthValues.size()) {
+        if (i < numVariables) {
             // output wants '-1' to be 0 for false, so manually add '0' instead of '-1'
             if (truthValues.at(i) < 0) {
                 output << "0" << endl;
@@ -115,6 +133,14 @@ void SimulatedAnnealing(int numVariables, map<int, vector<pair<int, int>>>& clau
     int k = 0;
 
     while (temperature > 0) {
+        if (!clauseMap.count(variable)) {
+            if (variable < numVariables) {
+                variable++;
+            }
+            else {
+                variable = 1;
+            }
+        }
         int currentState = getVariableCorrectClauses(variable, clauseMap, truthValues);
 
         // change truth value and get the number of correct clauses for nextState
