@@ -30,10 +30,10 @@ int main() {
     srand(time(0)); // note that this is pseudo-random: has slight bias towards lower numbers
 
     // input stream
-    string inputName;
-    cin >> inputName;
+    string group;
+    cin >> group;
 
-    ifstream input("input_group" + inputName + ".txt");
+    ifstream input("input_group" + group + ".txt");
     if (input.fail()) {
         cerr << "Failed to open input file." << endl;
         return -1;
@@ -79,9 +79,7 @@ int main() {
 
     // output stream
     cout << endl;
-    string outputName;
-    cin >> outputName;
-    ofstream output("output" + outputName + ".txt");
+    ofstream output("output_from_442_to_" + group + ".txt");
     if (output.fail()) {
         cerr << "Failed to create output file." << endl;
         return -1;
